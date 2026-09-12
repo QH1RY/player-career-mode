@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Road to Glory - Player Career</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">PLAYER CAREER</div>
+        <h1>Road to Glory</h1>
+      </div>
+      <div class="top-actions">
+        <button id="saveBtn">Save Career</button>
+        <button id="resetBtn" class="danger">Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="creator" class="panel creator">
+        <div class="panel-head">
+          <div><div class="eyebrow">START YOUR STORY</div><h2>Create Your Player</h2></div>
+          <div class="badge">Age 17</div>
+        </div>
+        <div class="form-grid">
+          <label>First name<input id="firstName" value="Jayden" /></label>
+          <label>Surname<input id="lastName" value="Cole" /></label>
+          <label>Nationality<select id="nationality"><option>England</option><option>Jamaica</option><option>France</option><option>Spain</option><option>Brazil</option><option>Nigeria</option><option>Portugal</option><option>Netherlands</option></select></label>
+          <label>Position<select id="position"><option>LW</option><option>RW</option><option>CAM</option><option>ST</option><option>CM</option><option>CDM</option><option>LB</option><option>RB</option><option>CB</option></select></label>
+          <label>Preferred foot<select id="foot"><option>Right</option><option>Left</option></select></label>
+          <label>Height<input id="height" type="number" value="175" min="155" max="205" /> cm</label>
+          <label>Career path<select id="path"><option>Academy graduate</option><option>Lower-league prospect</option><option>Released academy player</option><option>Highly rated wonderkid</option><option>Late developer</option></select></label>
+          <label>Difficulty<select id="difficulty"><option>Professional</option><option>World Class</option><option>Legendary</option><option>Simulation</option></select></label>
+        </div>
+        <button id="startBtn" class="primary big">Begin Career</button>
+      </section>
+
+      <section id="career" class="hidden">
+        <div class="hero-grid">
+          <div class="panel player-card">
+            <div class="player-avatar" id="avatar">10</div>
+            <div>
+              <div class="eyebrow" id="clubName">South London FC</div>
+              <h2 id="playerName">Jayden Cole</h2>
+              <div class="player-meta"><span id="posText">LW</span><span id="nationText">England</span><span id="ageText">17 yrs</span></div>
+              <div class="rating-row"><div><strong id="ovr">64</strong><span>OVR</span></div><div><strong id="pot">82</strong><span>POT</span></div><div><strong id="value">£1.2m</strong><span>VALUE</span></div></div>
+            </div>
+          </div>
+          <div class="panel trust-card"><div class="eyebrow">MANAGER TRUST</div><div class="meter"><div id="trustBar"></div></div><div class="trust-score"><strong id="trust">55</strong>/100</div><p id="managerNote">You're in the rotation. Earn your place.</p></div>
+          <div class="panel form-card"><div class="eyebrow">SEASON FORM</div><div class="big-stat" id="form">6.7</div><div class="mini-grid"><span><b id="apps">0</b>Apps</span><span><b id="goals">0</b>Goals</span><span><b id="assists">0</b>Assists</span><span><b id="week">1</b>Week</span></div></div>
+        </div>
+
+        <nav class="tabs">
+          <button class="tab active" data-tab="matchTab">Match Day</button>
+          <button class="tab" data-tab="careerTab">Career</button>
+          <button class="tab" data-tab="transfersTab">Transfers</button>
+          <button class="tab" data-tab="trainingTab">Training</button>
+          <button class="tab" data-tab="newsTab">News</button>
+        </nav>
+
+        <section id="matchTab" class="tab-page">
+          <div class="match-layout">
+            <div class="panel pitch-panel">
+              <div class="scoreboard"><span id="homeTeam">South London FC</span><strong><span id="homeScore">0</span> - <span id="awayScore">0</span></strong><span id="awayTeam">Riverside Athletic</span><em id="clock">00:00</em></div>
+              <canvas id="gameCanvas" width="1100" height="620"></canvas>
+              <div class="controls"><b>Controls:</b> WASD / arrows move · Shift sprint · Space call/pass · J shoot · K tackle · C camera</div>
+            </div>
+            <aside class="panel match-side">
+              <div class="eyebrow">CAMERA</div>
+              <select id="cameraSelect"><option>Player Follow</option><option>Pro Camera</option><option>Broadcast Lock</option><option>Shoulder</option></select>
+              <div class="eyebrow gap">OBJECTIVES</div>
+              <ul id="objectives"><li>Create 2 chances</li><li>Complete 3 dribbles</li><li>Finish above 7.0</li></ul>
+              <div class="match-rating"><span>Match rating</span><strong id="matchRating">6.0</strong></div>
+              <button id="kickoffBtn" class="primary">Kick Off</button>
+              <button id="simBtn">Sim Match</button>
+              <div id="matchMessage" class="message">Next fixture ready.</div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="careerTab" class="tab-page hidden">
+          <div class="grid-2">
+            <div class="panel"><div class="eyebrow">CAREER TIMELINE</div><div id="timeline" class="timeline"></div></div>
+            <div class="panel"><div class="eyebrow">ATTRIBUTES</div><div id="attributes" class="attrs"></div></div>
+          </div>
+        </section>
+
+        <section id="transfersTab" class="tab-page hidden">
+          <div class="grid-2">
+            <div class="panel"><div class="eyebrow">AGENT</div><h3>Maya Bennett</h3><p id="agentText">I’ll keep an eye on clubs that fit your level, playing style and minutes.</p><div class="agent-actions"><button data-agent="bigger">I want a bigger club</button><button data-agent="minutes">I want more playing time</button><button data-agent="loan">Find me a loan</button><button data-agent="stay">I'm happy here</button></div></div>
+            <div class="panel"><div class="eyebrow">CLUB INTEREST</div><div id="interestList" class="interest-list"></div></div>
+          </div>
+          <div class="panel transfer-market"><div class="eyebrow">TRANSFER CENTRE</div><div id="offers"></div></div>
+        </section>
+
+        <section id="trainingTab" class="tab-page hidden">
+          <div class="panel"><div class="eyebrow">DEVELOPMENT PLAN</div><h3 id="planTitle">Explosive Winger</h3><p>Training improves you gradually. Strong match form and manager trust speed progression.</p><div class="training-grid"><button data-train="pace">Sprint & Agility</button><button data-train="shooting">Finishing</button><button data-train="passing">Chance Creation</button><button data-train="dribbling">1v1 Dribbling</button><button data-train="physical">Strength & Stamina</button><button data-train="defending">Defensive Work</button></div><div id="trainingMsg" class="message">3 sessions available this week.</div></div>
+        </section>
+
+        <section id="newsTab" class="tab-page hidden"><div class="panel"><div class="eyebrow">FOOTBALL FEED</div><div id="newsFeed" class="news-feed"></div></div></section>
+      </section>
+    </main>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
