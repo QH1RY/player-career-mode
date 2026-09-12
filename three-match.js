@@ -4,6 +4,8 @@ const wrap = document.querySelector('.pitch-wrap');
 const legacyCanvas = document.getElementById('gameCanvas');
 if (!wrap || !legacyCanvas) throw new Error('3D match container not found');
 
+const getMatch = () => window.Career3DBridge?.getMatch?.() || null;
+
 legacyCanvas.style.opacity = '0';
 legacyCanvas.style.pointerEvents = 'none';
 legacyCanvas.style.position = 'relative';
@@ -31,11 +33,7 @@ sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-75; sun.shadow.camera
 const FIELD_L=105, FIELD_W=68;
 const pitchMat = new THREE.MeshStandardMaterial({color:0x2b8a45,roughness:0.92});
 const pitch = new THREE.Mesh(new THREE.PlaneGeometry(FIELD_L,FIELD_W),pitchMat); pitch.rotation.x=-Math.PI/2; pitch.receiveShadow=true; scene.add(pitch);
-
-// striped mowing pattern
-for(let i=0;i<10;i++){
-  if(i%2===0){const stripe=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_L/10-0.05,FIELD_W),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.025,depthWrite:false}));stripe.rotation.x=-Math.PI/2;stripe.position.set(-FIELD_L/2+(i+.5)*FIELD_L/10,.012,0);scene.add(stripe);}
-}
+for(let i=0;i<10;i++) if(i%2===0){const stripe=new THREE.Mesh(new THREE.PlaneGeometry(FIELD_L/10-0.05,FIELD_W),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.025,depthWrite:false}));stripe.rotation.x=-Math.PI/2;stripe.position.set(-FIELD_L/2+(i+.5)*FIELD_L/10,.012,0);scene.add(stripe);}
 
 const lineMat=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.95});
 function line(points){const g=new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(p[0],.035,p[1])));scene.add(new THREE.Line(g,lineMat));}
@@ -43,7 +41,6 @@ line([[-52.5,-34],[52.5,-34],[52.5,34],[-52.5,34],[-52.5,-34]]); line([[0,-34],[
 function rectLine(x1,z1,x2,z2){line([[x1,z1],[x2,z1],[x2,z2],[x1,z2],[x1,z1]]);} rectLine(-52.5,-20.16,-36,20.16);rectLine(36,-20.16,52.5,20.16);rectLine(-52.5,-9.16,-47,9.16);rectLine(47,-9.16,52.5,9.16);
 const cc=[];for(let i=0;i<=64;i++){const a=i/64*Math.PI*2;cc.push([Math.cos(a)*9.15,Math.sin(a)*9.15]);}line(cc);
 
-// Stadium bowl and advertising boards
 const standMat=new THREE.MeshStandardMaterial({color:0x253342,roughness:.8});
 const crowdMat=new THREE.MeshStandardMaterial({color:0x51616e,roughness:.9});
 function stand(x,z,w,d,rot=0){const base=new THREE.Mesh(new THREE.BoxGeometry(w,7,d),standMat);base.position.set(x,3.5,z);base.rotation.y=rot;base.receiveShadow=true;scene.add(base);const crowd=new THREE.Mesh(new THREE.BoxGeometry(w*.96,2.5,d*.75),crowdMat);crowd.position.set(x,7.1,z);crowd.rotation.y=rot;scene.add(crowd);} stand(0,-43,112,12);stand(0,43,112,12);stand(-61,0,12,74);stand(61,0,12,74);
@@ -76,15 +73,23 @@ function makeHuman(team='home',hero=false,gk=false){
   g.scale.setScalar(hero?1.06:1);scene.add(g);return g;
 }
 
-const hero3D=makeHuman('home',true,false); let mates3D=[],foes3D=[],homeGK=null,awayGK=null;
+const hero3D=makeHuman('home',true,false);
+const mates3D=Array.from({length:9},()=>makeHuman('home'));
+const foes3D=Array.from({length:10},()=>makeHuman('away'));
+const homeGK=makeHuman('home',false,true);
+const awayGK=makeHuman('away',false,true);
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.22,18,14),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.45}));ball.castShadow=true;scene.add(ball);
+
+// Formation placeholders keep all 22 players visible before/while match AI initialises.
+const homeFormation=[[-34,-24],[-34,-8],[-34,8],[-34,24],[-16,-20],[-14,0],[-16,20],[2,-20],[4,0]];
+const awayFormation=[[34,-24],[34,-8],[34,8],[34,24],[16,-20],[14,0],[16,20],[-2,-20],[-4,0],[0,22]];
+function setFormation(){hero3D.position.set(-24,0,0);mates3D.forEach((o,i)=>o.position.set(homeFormation[i][0],0,homeFormation[i][1]));foes3D.forEach((o,i)=>o.position.set(awayFormation[i][0],0,awayFormation[i][1]));homeGK.position.set(-49,0,0);awayGK.position.set(49,0,0);ball.position.set(0,.22,0);} setFormation();
 
 function worldPos(p){return new THREE.Vector3((p.x/1100-.5)*FIELD_L,0,(p.y/620-.5)*FIELD_W);}
 function syncHuman(obj,p,dt){if(!obj||!p)return;const target=worldPos(p);const prev=obj.userData.prev;const dx=target.x-prev.x,dz=target.z-prev.z;const speed=Math.hypot(dx,dz)/Math.max(dt,.001);obj.position.x=target.x;obj.position.z=target.z;if(Math.hypot(dx,dz)>.005)obj.rotation.y=Math.atan2(dx,dz);const parts=obj.userData.parts;const run=Math.min(1,speed/9);const phase=performance.now()*.012*(1+run*1.2);const swing=Math.sin(phase)*.72*run;parts.ll.hip.rotation.x=swing;parts.rl.hip.rotation.x=-swing;parts.la.shoulder.rotation.x=-swing*.7;parts.ra.shoulder.rotation.x=swing*.7;parts.ll.knee.rotation.x=Math.max(0,-Math.sin(phase))*.45*run;parts.rl.knee.rotation.x=Math.max(0,Math.sin(phase))*.45*run;parts.torso.rotation.z=Math.sin(phase*2)*.025*run;prev.copy(target);}
-function ensureTeams(){if(!window.match)return;while(mates3D.length<match.mates.length)mates3D.push(makeHuman('home'));while(foes3D.length<match.foes.length)foes3D.push(makeHuman('away'));if(match.homeKeeper&&!homeGK)homeGK=makeHuman('home',false,true);if((match.awayKeeper||match.keeper)&&!awayGK)awayGK=makeHuman('away',false,true);}
 
 const clock=new THREE.Clock();
-function cameraFollow(){if(!window.match)return;const hp=worldPos(match.player);const mode=document.getElementById('cameraSelect')?.value||'Player Follow';let desired,look;
+function cameraFollow(m){const hp=worldPos(m.player);const mode=document.getElementById('cameraSelect')?.value||'Player Follow';let desired,look;
   if(mode==='Broadcast Lock'){desired=new THREE.Vector3(hp.x-2,27,hp.z+35);look=new THREE.Vector3(hp.x+10,0,hp.z);}
   else if(mode==='Shoulder'){desired=new THREE.Vector3(hp.x-5.5,3.1,hp.z+1.8);look=new THREE.Vector3(hp.x+8,1.2,hp.z);}
   else if(mode==='Pro Camera'){desired=new THREE.Vector3(hp.x-9,5.1,hp.z);look=new THREE.Vector3(hp.x+12,1.2,hp.z);}
@@ -95,7 +100,23 @@ function cameraFollow(){if(!window.match)return;const hp=worldPos(match.player);
 function resize(){const r=wrap.getBoundingClientRect();renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);camera.aspect=Math.max(1,r.width)/Math.max(1,r.height);camera.updateProjectionMatrix();}
 new ResizeObserver(resize).observe(wrap);resize();
 
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.04,clock.getDelta());ensureTeams();if(window.match){syncHuman(hero3D,match.player,dt);match.mates.forEach((p,i)=>syncHuman(mates3D[i],p,dt));match.foes.forEach((p,i)=>syncHuman(foes3D[i],p,dt));if(homeGK&&match.homeKeeper)syncHuman(homeGK,match.homeKeeper,dt);if(awayGK&&(match.awayKeeper||match.keeper))syncHuman(awayGK,match.awayKeeper||match.keeper,dt);const bp=worldPos(match.ball);ball.position.set(bp.x,.22,bp.z);ball.rotation.z+=((match.ball.vx||0)*dt)*.35;ball.rotation.x+=((match.ball.vy||0)*dt)*.35;cameraFollow();}else{camera.position.lerp(new THREE.Vector3(-32,22,31),.03);camera.lookAt(0,0,0);}renderer.render(scene,camera);}animate();
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(.04,clock.getDelta());
+  const m=getMatch();
+  if(m){
+    syncHuman(hero3D,m.player,dt);
+    for(let i=0;i<mates3D.length;i++) syncHuman(mates3D[i],m.mates?.[i] || {x:190+(i%3)*110,y:90+Math.floor(i/3)*180},dt);
+    for(let i=0;i<foes3D.length;i++) syncHuman(foes3D[i],m.foes?.[i] || {x:650+(i%4)*105,y:70+(i%5)*110},dt);
+    syncHuman(homeGK,m.homeKeeper || {x:54,y:310},dt);
+    syncHuman(awayGK,m.awayKeeper || m.keeper || {x:1046,y:310},dt);
+    if(m.ball){const bp=worldPos(m.ball);ball.position.set(bp.x,.22,bp.z);ball.rotation.z+=((m.ball.vx||0)*dt)*.35;ball.rotation.x+=((m.ball.vy||0)*dt)*.35;}
+    cameraFollow(m);
+  } else {
+    camera.position.lerp(new THREE.Vector3(-32,22,31),.03);camera.lookAt(0,0,0);
+  }
+  renderer.render(scene,camera);
+}
+animate();
 
-// Small 3D badge so it is obvious the new renderer is active.
-const badge=document.createElement('div');badge.textContent='3D MATCH';Object.assign(badge.style,{position:'absolute',left:'12px',top:'12px',zIndex:'6',padding:'6px 9px',borderRadius:'8px',background:'rgba(5,15,10,.7)',color:'#dfff4d',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none'});wrap.appendChild(badge);
+const badge=document.createElement('div');badge.textContent='3D · 11 v 11';Object.assign(badge.style,{position:'absolute',left:'12px',top:'12px',zIndex:'6',padding:'6px 9px',borderRadius:'8px',background:'rgba(5,15,10,.7)',color:'#dfff4d',font:'800 10px system-ui',letterSpacing:'.12em',pointerEvents:'none'});wrap.appendChild(badge);
