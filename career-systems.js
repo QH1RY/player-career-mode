@@ -7,6 +7,9 @@
     if(typeof S.foulsWon!=='number') S.foulsWon=0;
     if(typeof S.pensWon!=='number') S.pensWon=0;
     if(typeof S.freeKicksWon!=='number') S.freeKicksWon=0;
+    if(typeof S.freeKickSkill!=='number') S.freeKickSkill=55;
+    if(typeof S.penaltySkill!=='number') S.penaltySkill=60;
+    if(typeof S.deadBallSkill!=='number') S.deadBallSkill=55;
   }
 
   function persist(){try{localStorage.setItem('rtgCareer',JSON.stringify(S));}catch(_){} try{save?.();}catch(_){}}
@@ -65,9 +68,28 @@
         <button data-drill="finishing">🎯 Finishing Drill<br><small>Shooting + points</small></button>
         <button data-drill="dribbling">⚡ Dribbling Course<br><small>Dribbling + pace</small></button>
         <button data-drill="passing">🔺 Passing Gates<br><small>Passing + vision</small></button>
-      </div><div id="drillMsg" class="message" style="margin-top:10px">Choose a drill. Better scores earn more development points.</div>`;
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)">
+        <div class="eyebrow">SET-PIECE DRILLS</div><h3 style="margin-top:6px">Dead-Ball Practice</h3>
+        <p>Improve your technique so real free kicks and penalties become more accurate and harder for the goalkeeper to stop.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <button data-setpiece-drill="freeKick">🥅 Free Kick Practice<br><small>Curve, accuracy & power</small></button>
+          <button data-setpiece-drill="penalty">⚽ Penalty Practice<br><small>Placement & composure</small></button>
+          <button data-setpiece-drill="deadBall">🚩 Corner & Delivery<br><small>Crossing & dead balls</small></button>
+        </div>
+        <div id="setPieceRatings" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:13px"></div>
+      </div>
+      <div id="drillMsg" class="message" style="margin-top:10px">Choose a drill. Better scores earn more development points.</div>`;
     tab.appendChild(panel);
     panel.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>runDrill(b.dataset.drill));
+    panel.querySelectorAll('[data-setpiece-drill]').forEach(b=>b.onclick=()=>runSetPieceDrill(b.dataset.setpieceDrill));
+    renderSetPieceRatings();
+  }
+
+  function renderSetPieceRatings(){
+    ensureCareerSystems();
+    const el=document.getElementById('setPieceRatings');if(!el)return;
+    el.innerHTML=`<span>Free kicks: <b>${S.freeKickSkill}</b></span><span>Penalties: <b>${S.penaltySkill}</b></span><span>Dead balls: <b>${S.deadBallSkill}</b></span>`;
   }
 
   function runDrill(type){
@@ -83,6 +105,36 @@
     S.trainingXP+=score;S.timeline?.unshift?.(`Training: ${type} drill scored ${score}/100 and earned ${reward} development point${reward===1?'':'s'}.`);
     const m=document.getElementById('drillMsg');if(m)m.textContent=`${type[0].toUpperCase()+type.slice(1)} drill: ${score}/100. +${reward} development point${reward===1?'':'s'}${score>=82?' and an attribute boost.':''}`;
     persist();try{render?.();}catch(_){ }
+  }
+
+  function runSetPieceDrill(type){
+    ensureCareerSystems();
+    const m=document.getElementById('drillMsg');
+    if((S.training||0)<=0){if(m)m.textContent='No training sessions left. Sim days to recover sessions.';return;}
+    S.training--;
+    const shooting=S.attributes?.shooting||60,passing=S.attributes?.passing||60;
+    const relevant=type==='deadBall'?passing:shooting;
+    const score=Math.max(45,Math.min(100,Math.round(52+Math.random()*35+(relevant-60)*.28)));
+    const gain=score>=92?3:score>=80?2:1;
+    const reward=score>=90?2:1;
+    S.skillPoints=(S.skillPoints||0)+reward;
+
+    if(type==='freeKick'){
+      S.freeKickSkill=Math.min(99,S.freeKickSkill+gain);
+      if(score>=88)S.attributes.shooting=Math.min(99,S.attributes.shooting+1);
+    }else if(type==='penalty'){
+      S.penaltySkill=Math.min(99,S.penaltySkill+gain);
+      if(score>=90)S.attributes.shooting=Math.min(99,S.attributes.shooting+1);
+    }else{
+      S.deadBallSkill=Math.min(99,S.deadBallSkill+gain);
+      if(score>=88)S.attributes.passing=Math.min(99,S.attributes.passing+1);
+    }
+
+    S.trainingXP+=score;
+    const label=type==='freeKick'?'Free Kick Practice':type==='penalty'?'Penalty Practice':'Corner & Delivery';
+    S.timeline?.unshift?.(`Set-piece training: ${label} scored ${score}/100.`);
+    if(m)m.textContent=`${label}: ${score}/100. Set-piece rating +${gain} and +${reward} development point${reward===1?'':'s'}.`;
+    renderSetPieceRatings();persist();try{render?.();}catch(_){ }
   }
 
   let foulCooldown=0;
@@ -110,11 +162,13 @@
 
   function takeSetPiece(){
     if(!match?.setPiece)return;
+    ensureCareerSystems();
     const sp=match.setPiece,shooting=S.attributes.shooting||60;
     const aim=window.Career3DBridge?.shotAim?.offset||((Math.random()-.5)*1.2);
     const placement=Math.min(1,Math.abs(aim));
-    const baseChance=sp.type==='penalty'?.68:.18;
-    const chance=Math.min(.93,baseChance+(shooting-60)/180+placement*.11);
+    const specialist=sp.type==='penalty'?S.penaltySkill:S.freeKickSkill;
+    const baseChance=sp.type==='penalty'?.54:.10;
+    const chance=Math.min(.95,baseChance+(shooting-60)/220+(specialist-50)/170+placement*.10);
     const scored=Math.random()<chance;
     if(scored){match.home++;match.playerGoals=(match.playerGoals||0)+1;match.rating=Math.min(10,match.rating+(sp.type==='penalty'?.9:1.05));flash(sp.type==='penalty'?'Penalty scored!':'Free kick GOAL!');}
     else{flash(sp.type==='penalty'?'Penalty saved!':'Free kick saved or wide.');}
@@ -150,5 +204,5 @@
   }
 
   ensureCareerSystems();addCalendarUI();addTrainingMode();wrapMatchLogic();
-  setTimeout(()=>{addCalendarUI();addTrainingMode();wrapMatchLogic();renderCalendar();},500);
+  setTimeout(()=>{addCalendarUI();addTrainingMode();wrapMatchLogic();renderCalendar();renderSetPieceRatings();},500);
 })();
