@@ -16,4 +16,14 @@
     trainingMode: null,
     cameraBasis: {fx:1,fz:0,rx:0,rz:1}
   };
+
+  const loadDefenderBalance = () => {
+    if (document.querySelector('script[data-defender-balance]')) return;
+    const script = document.createElement('script');
+    script.src = 'defender-balance.js?v=39';
+    script.dataset.defenderBalance = '39';
+    document.body.appendChild(script);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadDefenderBalance, {once:true});
+  else loadDefenderBalance();
 })();
