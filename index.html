@@ -4,12 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Road to Glory - Player Career</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=38" />
 </head>
 <body>
   <div id="app">
-    <header class="topbar"><div><div class="eyebrow">PLAYER CAREER</div><h1>Road to Glory</h1></div><div class="top-actions"><button id="saveBtn">Save Career</button><button id="resetBtn" class="danger">Reset</button></div></header>
+    <header class="topbar"><div><div class="eyebrow">PLAYER CAREER · BUILD 38</div><h1>Road to Glory</h1></div><div class="top-actions"><button id="saveBtn">Save Career</button><button id="resetBtn" class="danger">Reset</button></div></header>
     <main>
       <section id="creator" class="panel creator"><div class="panel-head"><div><div class="eyebrow">START YOUR STORY</div><h2>Create Your Player</h2></div><div class="badge">Age 17</div></div><div class="form-grid"><label>First name<input id="firstName" value="Jayden" /></label><label>Surname<input id="lastName" value="Cole" /></label><label>Nationality<select id="nationality"><option>England</option><option>Jamaica</option><option>France</option><option>Spain</option><option>Brazil</option><option>Nigeria</option><option>Portugal</option><option>Netherlands</option></select></label><label>Position<select id="position"><option>LW</option><option>RW</option><option>CAM</option><option>ST</option><option>CM</option><option>CDM</option><option>LB</option><option>RB</option><option>CB</option></select></label><label>Preferred foot<select id="foot"><option>Right</option><option>Left</option></select></label><label>Height<input id="height" type="number" value="175" min="155" max="205" /> cm</label><label>Career path<select id="path"><option>Academy graduate</option><option>Lower-league prospect</option><option>Released academy player</option><option>Highly rated wonderkid</option><option>Late developer</option></select></label><label>Difficulty<select id="difficulty"><option>Professional</option><option>World Class</option><option>Legendary</option><option>Simulation</option></select></label></div><button id="startBtn" class="primary big">Begin Career</button></section>
       <section id="career" class="hidden">
@@ -23,6 +26,6 @@
       </section>
     </main>
   </div>
-  <script src="game.js"></script><script src="player-model.js"></script><script src="touch.js"></script><script src="shooting-upgrades.js"></script><script src="progression.js"></script><script src="state-bridge.js"></script><script src="onboarding.js"></script><script src="career-systems.js"></script><script src="league-system.js"></script><script src="halftime.js"></script><script src="gameplay-actions.js"></script><script type="module" src="three-match.js"></script>
+  <script src="game.js?v=38"></script><script src="player-model.js?v=38"></script><script src="touch.js?v=38"></script><script src="shooting-upgrades.js?v=38"></script><script src="progression.js?v=38"></script><script src="state-bridge.js?v=38"></script><script src="onboarding.js?v=38"></script><script src="career-systems.js?v=38"></script><script src="league-system.js?v=38"></script><script src="halftime.js?v=38"></script><script src="gameplay-actions.js?v=38"></script><script type="module" src="three-match.js?v=38"></script>
 </body>
 </html>
