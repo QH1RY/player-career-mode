@@ -6,10 +6,10 @@
 
   function difficultyMultiplier() {
     const d = (typeof S !== 'undefined' && S?.difficulty) || 'Professional';
-    if (d === 'Legendary') return 1.10;
-    if (d === 'World Class') return 1.05;
-    if (d === 'Simulation') return 1.02;
-    return 0.98;
+    if (d === 'Legendary') return 1.04;
+    if (d === 'World Class') return 1.00;
+    if (d === 'Simulation') return 0.97;
+    return 0.93;
   }
 
   update = function () {
@@ -20,11 +20,13 @@
     const carrierBefore = match.ball?.carrier || null;
     const move = bridge().lastMove || lastDir;
     const dot = move.x * lastDir.x + move.y * lastDir.y;
-    const sharpTurn = Math.hypot(move.x, move.y) > 0.25 && dot < 0.72;
+    const sharpTurn = Math.hypot(move.x, move.y) > 0.25 && dot < 0.78;
 
+    // Defenders need a human reaction to changes of direction instead of tracking
+    // the player's joystick instantly.
     if (sharpTurn) {
       match.foes.forEach((f, i) => {
-        if (i < 4) f.reactionFrames = Math.max(f.reactionFrames || 0, 6 + Math.floor(Math.random() * 5));
+        if (i < 4) f.reactionFrames = Math.max(f.reactionFrames || 0, 10 + Math.floor(Math.random() * 7));
       });
     }
     if (Math.hypot(move.x, move.y) > 0.25) lastDir = { x: move.x, y: move.y };
@@ -40,13 +42,19 @@
       const dy = f.y - prev.y;
       const dist = Math.hypot(dx, dy);
       const pressing = i < 4 && (ownerBefore === 'player' || ownerBefore === 'mate');
-      let maxStep = (pressing ? 1.20 : 0.86) * mult;
+
+      // Player sprint is ~2.3+ units/frame. A pressing defender is now capped
+      // well below that, so a fast attacker can genuinely create separation.
+      let maxStep = (pressing ? 0.98 : 0.72) * mult;
 
       if ((f.reactionFrames || 0) > 0) {
         f.reactionFrames--;
-        maxStep *= 0.42;
-        f.tackleCd = Math.max(f.tackleCd || 0, 5);
+        maxStep *= 0.34;
+        f.tackleCd = Math.max(f.tackleCd || 0, 12);
       }
+
+      // Failed/recent tackles have a recovery penalty rather than instant pursuit.
+      if ((f.tackleCd || 0) > 45) maxStep *= 0.72;
 
       if (dist > maxStep && dist > 0) {
         f.x = prev.x + (dx / dist) * maxStep;
@@ -54,26 +62,24 @@
       }
     });
 
-    // If the old AI stole the ball using movement that has just been clamped away,
-    // cancel that impossible tackle so defenders cannot 'snap' into possession.
+    // Cancel impossible snap tackles after the defender movement has been capped.
     if (ownerBefore === 'player' && match.ball?.owner === 'foe' && match.ball.carrier) {
       const f = match.ball.carrier;
       const gap = Math.hypot(f.x - match.player.x, f.y - match.player.y);
-      if (gap > 24) {
+      if (gap > 22) {
         match.ball.owner = 'player';
         match.ball.carrier = null;
         match.ball.vx = 0;
         match.ball.vy = 0;
-        f.tackleCd = Math.max(f.tackleCd || 0, 70);
+        f.tackleCd = Math.max(f.tackleCd || 0, 85);
       }
     }
 
-    // Opposition ball carriers should not outrun a sprinting created player by default.
+    // Opposition carriers should not automatically outrun the created player.
     if (match.ball?.owner === 'foe' && match.ball.carrier && carrierBefore === match.ball.carrier) {
       const f = match.ball.carrier;
-      if (f.x < before[match.foes.indexOf(f)]?.x - 1.05) {
-        f.x = before[match.foes.indexOf(f)].x - 1.05;
-      }
+      const idx = match.foes.indexOf(f);
+      if (idx >= 0 && before[idx] && f.x < before[idx].x - 0.92) f.x = before[idx].x - 0.92;
     }
 
     return result;
