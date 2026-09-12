@@ -17,13 +17,19 @@
     cameraBasis: {fx:1,fz:0,rx:0,rz:1}
   };
 
-  const loadDefenderBalance = () => {
-    if (document.querySelector('script[data-defender-balance]')) return;
+  const loadExtra = (src, attr, type='text/javascript') => {
+    if (document.querySelector(`script[data-extra="${attr}"]`)) return;
     const script = document.createElement('script');
-    script.src = 'defender-balance.js?v=39';
-    script.dataset.defenderBalance = '39';
+    script.src = src;
+    script.type = type;
+    script.dataset.extra = attr;
     document.body.appendChild(script);
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadDefenderBalance, {once:true});
-  else loadDefenderBalance();
+
+  const loadEnhancements = () => {
+    loadExtra('defender-balance.js?v=40', 'defender-balance');
+    loadExtra('smooth-renderer.js?v=40', 'smooth-renderer', 'module');
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadEnhancements, {once:true});
+  else loadEnhancements();
 })();
