@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Road to Glory - Player Career</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -65,8 +66,19 @@
           <div class="match-layout">
             <div class="panel pitch-panel">
               <div class="scoreboard"><span id="homeTeam">South London FC</span><strong><span id="homeScore">0</span> - <span id="awayScore">0</span></strong><span id="awayTeam">Riverside Athletic</span><em id="clock">00:00</em></div>
-              <canvas id="gameCanvas" width="1100" height="620"></canvas>
-              <div class="controls"><b>Controls:</b> WASD / arrows move · Shift sprint · Space call/pass · J shoot · K tackle · C camera</div>
+              <div class="pitch-wrap">
+                <canvas id="gameCanvas" width="1100" height="620"></canvas>
+                <div id="touchControls" class="touch-controls" aria-label="iPad game controls">
+                  <div id="joystick" class="joystick"><div id="stick" class="stick"></div></div>
+                  <div class="action-buttons">
+                    <button id="touchSprint" class="action sprint">SPRINT</button>
+                    <button id="touchPass" class="action pass">PASS</button>
+                    <button id="touchShoot" class="action shoot">SHOOT</button>
+                    <button id="touchTackle" class="action tackle">TACKLE</button>
+                  </div>
+                </div>
+              </div>
+              <div class="controls"><b>iPad:</b> use the left joystick to move. Hold Sprint for speed. Tap Pass, Shoot or Tackle. <span class="desktop-help">Keyboard: WASD / arrows · Shift · Space · J · K · C</span></div>
             </div>
             <aside class="panel match-side">
               <div class="eyebrow">CAMERA</div>
@@ -105,5 +117,6 @@
     </main>
   </div>
   <script src="game.js"></script>
+  <script src="touch.js"></script>
 </body>
 </html>
