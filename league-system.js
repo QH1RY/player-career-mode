@@ -89,7 +89,7 @@
     wrapped.__leagueWrapped=true;completeMatch=wrapped;
   }
 
-  function makeMatchesLonger(){
+  function makeMatchesFiveMinutes(){
     if(typeof update!=='function'||update.__durationWrapped)return;
     const base=update;
     const wrapped=function(){
@@ -98,8 +98,9 @@
       const out=base();
       const after=match.time||before;
       const delta=Math.max(0,after-before);
-      // Existing engine advances about 2.28 game-seconds/frame. Scale to ~5.5 real minutes for 90 minutes.
-      match.time=before+delta*0.12;
+      // The base engine advances about 2.28 in-game seconds per frame at 60fps.
+      // 0.13158 scales 90 in-game minutes to almost exactly 300 real seconds (5 minutes).
+      match.time=before+delta*0.13158;
       return out;
     };
     wrapped.__durationWrapped=true;update=wrapped;
@@ -113,6 +114,6 @@
     const k=document.getElementById('kickoffBtn');if(k)k.onclick=startMatch;
   }
 
-  ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesLonger();wrapStartMatch();renderLeague();
-  setTimeout(()=>{ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesLonger();wrapStartMatch();renderLeague();},450);
+  ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesFiveMinutes();wrapStartMatch();renderLeague();
+  setTimeout(()=>{ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesFiveMinutes();wrapStartMatch();renderLeague();},450);
 })();
