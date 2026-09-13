@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Steal an Egg</title>
+  <link rel="stylesheet" href="style.css?v=1" />
+</head>
+<body>
+  <div id="hud">
+    <div class="brand">STEAL AN EGG</div>
+    <div class="stats">
+      <span>🥚 <b id="eggs">0</b></span>
+      <span>🪙 <b id="coins">0</b></span>
+      <span>⚡ <b id="speed">10</b></span>
+      <span>🎒 <b id="bag">0/3</b></span>
+    </div>
+  </div>
+  <div id="message">Run on the treadmill to get faster, then steal eggs from the bosses!</div>
+  <div id="game"></div>
+  <div id="touchUI">
+    <div id="joystick"><div id="stick"></div></div>
+    <div class="actions">
+      <button id="stealBtn">STEAL</button>
+      <button id="sprintBtn">SPRINT</button>
+    </div>
+  </div>
+  <div id="help">
+    <b>How to play</b><br>
+    Train speed on treadmills → enter boss zones → steal eggs → escape → sell eggs for coins → unlock harder areas.
+  </div>
+  <script type="module" src="game.js?v=1"></script>
+</body>
+</html>
