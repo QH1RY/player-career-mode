@@ -53,9 +53,9 @@
     };wrapped.__leagueWrapped=true;completeMatch=wrapped;
   }
 
-  function makeMatchesFiveMinutes(){if(typeof update!=='function'||update.__durationWrapped)return;const base=update;const wrapped=function(){if(!match)return base();const before=match.time||0,out=base(),after=match.time||before,delta=Math.max(0,after-before);match.time=before+delta*0.13158;return out;};wrapped.__durationWrapped=true;update=wrapped;}
+  function makeMatchesThreeMinutes(){if(typeof update!=='function'||update.__durationWrapped)return;const base=update;const wrapped=function(){if(!match)return base();const before=match.time||0,out=base(),after=match.time||before,delta=Math.max(0,after-before);match.time=before+delta*0.2193;return out;};wrapped.__durationWrapped=true;update=wrapped;}
   function wrapStartMatch(){if(typeof startMatch!=='function'||startMatch.__leagueStartWrapped)return;const base=startMatch;const wrapped=function(){ensureLeague();renderLeague();const out=base();const away=document.getElementById('awayTeam');if(away)away.textContent=S.currentOpponent;return out;};wrapped.__leagueStartWrapped=true;startMatch=wrapped;const k=document.getElementById('kickoffBtn');if(k)k.onclick=startMatch;}
 
-  ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesFiveMinutes();wrapStartMatch();renderLeague();
-  setTimeout(()=>{ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesFiveMinutes();wrapStartMatch();renderLeague();},450);
+  ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesThreeMinutes();wrapStartMatch();renderLeague();
+  setTimeout(()=>{ensureLeague();addLeagueTab();wrapCompleteMatch();makeMatchesThreeMinutes();wrapStartMatch();renderLeague();},450);
 })();
