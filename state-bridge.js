@@ -1,4 +1,4 @@
-// Bridge classic-script career state into the ES-module 3D renderer and gameplay extensions.
+// Bridge classic-script career state into the 3D renderer and gameplay extensions.
 (() => {
   try {
     Object.defineProperty(window, 'match', {
@@ -6,6 +6,7 @@
       get: () => match
     });
   } catch (_) {}
+
   window.Career3DBridge = {
     getState: () => (typeof S !== 'undefined' ? S : null),
     getKeys: () => (typeof keys !== 'undefined' ? keys : {}),
@@ -17,19 +18,14 @@
     cameraBasis: {fx:1,fz:0,rx:0,rz:1}
   };
 
-  const loadExtra = (src, attr, type='text/javascript') => {
-    if (document.querySelector(`script[data-extra="${attr}"]`)) return;
-    const script = document.createElement('script');
-    script.src = src;
-    script.type = type;
-    script.dataset.extra = attr;
+  const loadDefenderBalance = () => {
+    if (document.querySelector('script[data-extra="defender-balance"]')) return;
+    const script=document.createElement('script');
+    script.src='defender-balance.js?v=43';
+    script.dataset.extra='defender-balance';
     document.body.appendChild(script);
   };
 
-  const loadEnhancements = () => {
-    loadExtra('defender-balance.js?v=40', 'defender-balance');
-    loadExtra('smooth-renderer.js?v=40', 'smooth-renderer', 'module');
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadEnhancements, {once:true});
-  else loadEnhancements();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadDefenderBalance,{once:true});
+  else loadDefenderBalance();
 })();
